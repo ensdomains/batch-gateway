@@ -63,4 +63,28 @@ describe('makeServer', () => {
     expect(status).toBe(200);
     expect(decodedQuery[0]).toBe(response);
   });
+  
+  it('makes POST request if url does not include data', async () => {
+    nock(host, {
+      reqheaders: {
+        "Content-Type": "application/json"
+      }
+    })
+      .post(`/${TEST_ADDRESS}.json`, {
+        sender: TEST_ADDRESS,
+        data: callData
+      })
+      .reply(200, {data:response})
+
+    const { status, body } = await server.call({
+      to: TEST_ADDRESS,
+      data: GatewayI.encodeFunctionData('query', [[{urls:[`${host}/{sender}.json`], callData}]])
+    });
+    const { responses: decodedQuery } = GatewayI.decodeFunctionResult(
+      'query',
+      body.data
+    );
+    expect(status).toBe(200);
+    expect(decodedQuery[0]).toBe(response);
+  });
 });

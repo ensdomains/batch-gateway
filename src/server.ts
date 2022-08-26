@@ -16,8 +16,18 @@ export function makeServer() {
             const callData = d.callData;
             const gatewayUrl = url
               .replace('{sender}', sender)
-              .replace('{data}', callData);
-            return fetch(gatewayUrl).then(response => response.json());
+
+            if(url.match("{data}")){
+              return fetch(gatewayUrl.replace('{data}', callData)).then(response => response.json());
+            }else{
+              return fetch(gatewayUrl, {
+                method: 'post',
+                body: JSON.stringify({
+                  sender, data: callData
+                }),
+                headers: {'Content-Type': 'application/json'}
+              }).then(response => response.json());
+            }
           })
         );
         return [responses.map((r: any) => r.data)];
