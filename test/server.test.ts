@@ -56,7 +56,6 @@ describe('makeServer', () => {
       to: TEST_ADDRESS,
       data: GatewayI.encodeFunctionData('query', [[{urls:[`${host}/{sender}/{data}.json`], callData}]])
     });
-    console.log('***body.data', body.data)
     const { responses: decodedQuery } = GatewayI.decodeFunctionResult(
       'query',
       body.data
@@ -65,7 +64,7 @@ describe('makeServer', () => {
     expect(decodedQuery[0]).toBe(response);
   });
 
-  it.only('handle multiple gateways', async () => {
+  it('skips non 200 responses when multiple gateway urls are passed', async () => {
     nock(host)
       .get(`/${TEST_ADDRESS}/${callData}.json`)
       .reply(400)

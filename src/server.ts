@@ -3,7 +3,10 @@ import { Result } from 'ethers/lib/utils';
 import fetch from 'cross-fetch';
 import { abi as Gateway_abi } from '@ensdomains/ens-contracts/artifacts/contracts/utils/OffchainMulticallable.sol/BatchGateway.json';
 
-function fetchGateway (url: string, gatewayUrl: string, sender: any, callData: any){
+function fetchGateway (url: string, sender: any, callData: any){
+  const gatewayUrl = url
+    .replace('{sender}', sender)
+
   if(url.match("{data}")){
     return fetch(gatewayUrl.replace('{data}', callData)).then(response => response.json());
   }else{
@@ -26,15 +29,15 @@ export function makeServer() {
         const sender = request.to;
         let responses = await Promise.all(
           data.map((d: any) => {
-            const url = d.urls[0];
-            const callData = d.callData;
-            const gatewayUrl = url
-              .replace('{sender}', sender)
-
-            return fetchGateway(url, gatewayUrl, sender, callData)
+            return Promise.allSettled(d.urls.map((url: string) => {
+              return fetchGateway(url, sender, d.callData)
+            })).then((values) => {
+              // reject non 200 responses
+              return values.filter(v => v.status === 'fulfilled').map((v:any) => v.value)
+            });
           })
         );
-        return [responses.map((r: any) => r.data)];
+        return [responses.map((r: any) => r[0].data)];
       },
     },
   ]);
