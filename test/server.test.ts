@@ -49,12 +49,12 @@ describe('makeServer', () => {
 
   it('makes GET request if url includes sender and data', async () => {
     nock(host)
-      .get(`/${TEST_ADDRESS}/${callData}`)
+      .get(`/${TEST_ADDRESS}/${callData}.json`)
       .reply(200, {data:response})
 
     const { status, body } = await server.call({
       to: TEST_ADDRESS,
-      data: GatewayI.encodeFunctionData('query', [[{urls:[`${host}/{sender}/{data}`], callData}]])
+      data: GatewayI.encodeFunctionData('query', [[{urls:[`${host}/{sender}/{data}.json`], callData}]])
     });
     const { responses: decodedQuery } = GatewayI.decodeFunctionResult(
       'query',
