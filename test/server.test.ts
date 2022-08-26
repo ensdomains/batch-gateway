@@ -42,8 +42,8 @@ const addrData = ResolverI.encodeFunctionData(fragment, [node,60]);
 const callData = IResolverService.encodeFunctionData('resolve', [ dnsName, addrData]);
 
 const host = 'https://example.com'
-const response = "0x000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000630897b100000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000cc51a41e97da8ceea7655c2ee316ca2692c29c250a121830815c12e6f70581d93d7bea067cfbe2abc17e779bda272c2690b1a4742c8477ab931cf5129a9d23"
-
+const host2 = 'https://example2.com'
+const response = GatewayI.encodeFunctionResult('query', [[1]])
 describe('makeServer', () => {
   const server = makeServer();
 
@@ -56,6 +56,7 @@ describe('makeServer', () => {
       to: TEST_ADDRESS,
       data: GatewayI.encodeFunctionData('query', [[{urls:[`${host}/{sender}/{data}.json`], callData}]])
     });
+    console.log('***body.data', body.data)
     const { responses: decodedQuery } = GatewayI.decodeFunctionResult(
       'query',
       body.data
@@ -63,7 +64,33 @@ describe('makeServer', () => {
     expect(status).toBe(200);
     expect(decodedQuery[0]).toBe(response);
   });
-  
+
+  it.only('handle multiple gateways', async () => {
+    nock(host)
+      .get(`/${TEST_ADDRESS}/${callData}.json`)
+      .reply(400)
+
+    nock(host2)
+      .get(`/${TEST_ADDRESS}/${callData}.json`)
+      .reply(200, {data:response})
+
+    const { status, body } = await server.call({
+      to: TEST_ADDRESS,
+      data: GatewayI.encodeFunctionData('query', [[{
+        urls:[
+          `${host}/{sender}/{data}.json`,
+          `${host2}/{sender}/{data}.json`
+        ], callData
+      }]])
+    });
+    const { responses: decodedQuery } = GatewayI.decodeFunctionResult(
+      'query',
+      body.data
+    );
+    expect(status).toBe(200);
+    expect(decodedQuery[0]).toBe(response);
+  });
+
   it('makes POST request if url does not include data', async () => {
     nock(host, {
       reqheaders: {
