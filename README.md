@@ -50,7 +50,7 @@ ethers.js does the following behind the scene.
 
 - Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` with callData and each gateway url
 
-The multicall gateway does the following
+The batch gateway server does the following
 
 - The batch gateway server decodes `Gateway.query(callDatas)` and call each gateway server in parallel
 
