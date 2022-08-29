@@ -1,7 +1,7 @@
 # Batch gateway
 
 The normal CCIP gateway can only request single record at a time.
-The batch gateway will make use of of `OffchainMulticallable.multicall` function that combines multiple calls if `OffchainResolver` inherits `OffchainMulticallable` and override `batchGatewayURLs` function with the batch gateway url.
+The batch gateway will make use of `OffchainMulticallable.multicall` function that combines multiple calls if `OffchainResolver` inherits `OffchainMulticallable` and overrides `batchGatewayURLs` function with the batch gateway url.
 
 ```
 contract OffchainResolver is IExtendedResolver, ERC165, OffchainMulticallable {
@@ -19,7 +19,7 @@ contract OffchainResolver is IExtendedResolver, ERC165, OffchainMulticallable {
         gateways = _gateways;
 ```
 
-To use the batch gateway, first [start up offchain resolver by following the guide](https://github.com/ensdomains/offchain-resolver#trying-it-out). Make sure that you test client code to make sure that OffchainResolver works on its own without the batch gateway.
+To use the batch gateway, first [start up offchain resolver by following the guide](https://github.com/ensdomains/offchain-resolver#trying-it-out). Make sure that you test the client script (`yarn start:client..`) works on its own without the batch gateway.
 
 Then start the batch gateway server
 
@@ -29,7 +29,6 @@ yarn build
 yarn start
 $yarn start
 yarn run v1.22.17
-warning ../package.json: No license field
 $ node dist/index.js
 Serving on port 8081
 ```
