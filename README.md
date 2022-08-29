@@ -21,17 +21,17 @@ Serving on port 8081
 Tot test, run `client.js`
 
 ```
-$node src/client.js  --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 --uAddress 0x71C95911E9a5D330f4D621842EC243EE1343292e foo.test.eth
+$node src/client.js  --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
 {
   name: 'foo.test.eth',
   coinType: 60,
-  finalResult: [ '0x70997970c51812dc3a010c7d01b50e0d17dc79c8' ],
+  addrResult: [ '0x70997970c51812dc3a010c7d01b50e0d17dc79c8' ],
   decodedResult: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
 }
 {
   name: 'foo.test.eth',
   coinType: 0,
-  finalResult: [ '0x0000000000000000000000000000000000000000' ],
+  addrResult: [ '0x0000000000000000000000000000000000000000' ],
   decodedResult: 'bc1q9zpgru'
 }
 ```
@@ -40,13 +40,21 @@ $node src/client.js  --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 --uAd
 
 The batch client and gateway go through the following sequence.
 
-- Call `UniversalResolver.findResolver(dnsname)` to find the correct offchain resolver
+- Call `resolver.getResolver(name)` to find the correct offchain resolver
 - Encode `addr(node,coinType)` call into `addrData`
 - Encode `resolver(dnsname, addrData)` into `callData`
 - Combine `callData` into the array of `callDatas`
 - Call `offchainResolver.multicall(callDatas)`
+
+ethers.js does the following behind the scene.
+
 - Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` with callData and each gateway url
-- Call the gateway server
+
+The multicall gateway does the following
+
 - The batch gateway server decodes `Gateway.query(callDatas)` and call each gateway server in parallel
-- Once the client receive the response, decode in the order of `Gateway.query` -> `ResolverService.resolve` -> `Resolver.addr(node, cointype)`
+
+Once the client receive the response
+
+- decode in the order of `Gateway.query` -> `ResolverService.resolve` -> `Resolver.addr(node, cointype)`
 - Decode each coin cointype
