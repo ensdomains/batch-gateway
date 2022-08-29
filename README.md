@@ -1,4 +1,4 @@
-# Multicall gateway
+# Batch gateway
 
 The normal CCIP gateway can only request single record at a time.
 The batch gateway will make use of of `OffchainMulticallable.multicall` function that combines multiple calls.

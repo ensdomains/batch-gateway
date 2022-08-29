@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "@ensdomains/multicall-gateway",
+  "name": "@ensdomains/batch-gateway",
   "author": "Makoto Inoue",
   "module": "dist/gateway.esm.js",
   "size-limit": [
