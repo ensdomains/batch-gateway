@@ -1,11 +1,27 @@
 # Batch gateway
 
 The normal CCIP gateway can only request single record at a time.
-The batch gateway will make use of of `OffchainMulticallable.multicall` function that combines multiple calls.
+The batch gateway will make use of of `OffchainMulticallable.multicall` function that combines multiple calls if `OffchainResolver` inherits `OffchainMulticallable` and override `batchGatewayURLs` function with the batch gateway url.
 
-To use the batch gateway, first [start up offchain resolver by following the guide](https://github.com/ensdomains/offchain-resolver#trying-it-out).
+```
+contract OffchainResolver is IExtendedResolver, ERC165, OffchainMulticallable {
+    string[] internal batchgateways;
+    string[] internal gateways;
 
-Then start the multicall gateway server
+    error OffchainLookup(address sender, string[] urls, bytes callData, bytes4 callbackFunction, bytes extraData);
+
+    function batchGatewayURLs() internal override view returns(string[] memory) {
+        return batchgateways;
+    }
+
+    constructor(string[] memory _batchGateways, string[] memory _gateways, address[] memory _signers) {
+        batchgateways = _batchGateways;
+        gateways = _gateways;
+```
+
+To use the batch gateway, first [start up offchain resolver by following the guide](https://github.com/ensdomains/offchain-resolver#trying-it-out). Make sure that you test client code to make sure that OffchainResolver works on its own without the batch gateway.
+
+Then start the batch gateway server
 
 ```
 yarn
@@ -18,7 +34,7 @@ $ node dist/index.js
 Serving on port 8081
 ```
 
-Tot test, run `client.js`
+To test, run `client.js`
 
 ```
 $node src/client.js  --registry 0x5FbDB2315678afecb367f032d93F642f64180aa3 foo.test.eth
@@ -44,11 +60,11 @@ The batch client and gateway go through the following sequence.
 - Encode `addr(node,coinType)` call into `addrData`
 - Encode `resolver(dnsname, addrData)` into `callData`
 - Combine `callData` into the array of `callDatas`
-- Call `offchainResolver.multicall(callDatas)`
+- Call `offchainResolver.multicall(callDatas, {ccipReadEnabled:true})` with CCIP-read feature enabled
 
 ethers.js does the following behind the scene.
 
-- Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` with callData and each gateway url
+- Catch `OffchainLookup` error that encodes `Gateway.query(callDatas)` with callData with each gateway url
 
 The batch gateway server does the following
 
