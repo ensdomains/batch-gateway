@@ -33,6 +33,7 @@ export function makeServer() {
               return fetchGateway(url, sender, d.callData)
             })).then((values) => {
               // reject non 200 responses
+              // @ts-ignore
               return values.filter(v => v.status === 'fulfilled').map((v:any) => v.value)
             });
           })
