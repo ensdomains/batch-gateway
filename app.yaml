@@ -1,0 +1,4 @@
+runtime: nodejs10
+entrypoint: "node dist/index.js --port $PORT"
+env_variables:
+  PORT: 8080
